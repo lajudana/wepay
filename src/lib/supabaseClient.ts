@@ -5,10 +5,19 @@ const supabasePublishableKey =
   import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 
 if (!supabaseUrl || !supabasePublishableKey) {
-  throw new Error('Supabase environment variables tidak dijumpai.')
+  throw new Error(
+    'VITE_SUPABASE_URL atau VITE_SUPABASE_PUBLISHABLE_KEY tidak dijumpai.'
+  )
 }
 
 export const supabase = createClient(
   supabaseUrl,
-  supabasePublishableKey
+  supabasePublishableKey,
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+    },
+  }
 )
