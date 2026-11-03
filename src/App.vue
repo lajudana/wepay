@@ -1,5 +1,5 @@
 <template>
-  <AuthGate>
+ <AuthGate @authorized="initializeAuthenticatedApp">
     <div class="min-h-screen flex flex-col bg-slate-100">
 
     <!-- MAIN CRM APPLICATION -->
@@ -1421,10 +1421,15 @@
 import AuthGate from './components/AuthGate.vue'
 import { supabase } from './lib/supabaseClient'
 
+import {
+  fetchCustomers,
+  createCustomerRecord,
+  updateCustomerRecord,
+  deleteCustomerRecord
+} from './services/customerService'
+
 const DEFAULT_AVATARS = [
-  "https://ui-avatars.com/api/?name=Muhammad+Farid&background=0176d3&color=fff",
-  "https://ui-avatars.com/api/?name=Chloe+Lim&background=032d60&color=fff",
-  "https://ui-avatars.com/api/?name=Arvind+Kumar&background=014486&color=fff"
+  "https://ui-avatars.com/api/?name=Customer&background=0176d3&color=fff"
 ];
 
 export default {
