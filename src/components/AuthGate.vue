@@ -4,6 +4,8 @@ import type { Session } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabaseClient'
 import AdminLogin from './AdminLogin.vue'
 
+const emit = defineEmits(['authorized'])
+
 const session = ref<Session | null | undefined>(undefined)
 const authorized = ref(false)
 const loading = ref(true)
@@ -54,6 +56,7 @@ async function verifyAdministrator(
   accessError.value = ''
   authorized.value = true
   loading.value = false
+  emit('authorized') 
 }
 
 watch(session, (currentSession) => {
