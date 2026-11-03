@@ -1,45 +1,9 @@
 <template>
-  <div class="min-h-screen flex flex-col bg-slate-100">
-
-
-    <!-- LOGIN SCREEN WHEN LOGGED OUT -->
-    <div v-if="!isAuthenticated" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#032d60] via-[#014486] to-slate-900 p-4">
-      <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-md w-full p-8">
-        <div class="flex items-center gap-3 mb-6">
-          <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-400 flex items-center justify-center text-white font-extrabold text-xl shadow-md">
-            LD
-          </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <span class="text-2xl font-extrabold tracking-tight text-slate-900">LajuDana</span>
-              <span class="text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">CRM Cloud</span>
-            </div>
-            <p class="text-xs font-medium text-slate-500">powered by <span class="text-blue-600 font-semibold">SoBot</span> • Enterprise Loan Management</p>
-          </div>
-        </div>
-
-        <h1 class="text-lg font-bold text-slate-900 mb-1">Log Masuk Pentadbir (Admin CRM)</h1>
-        <p class="text-xs text-slate-500 mb-6">Sila log masuk untuk mengakses pangkalan data pelanggan & pinjaman LajuDana.</p>
-
-        <form @submit.prevent="handleLogin" class="space-y-4">
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">ID Pentadbir / E-mel</label>
-            <input v-model="loginForm.username" type="text" required class="w-full px-3.5 py-2.5 text-sm rounded-lg border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none" placeholder="admin@lajudana.com.my" />
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Kata Laluan</label>
-            <input v-model="loginForm.password" type="password" required class="w-full px-3.5 py-2.5 text-sm rounded-lg border border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none" placeholder="••••••••" />
-          </div>
-          <button type="submit" class="w-full py-2.5 px-4 bg-[#0176d3] hover:bg-[#0160ad] text-white font-semibold rounded-lg shadow transition flex items-center justify-center gap-2 text-sm">
-            <span>Log Masuk ke LajuDana CRM</span>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-          </button>
-        </form>
-      </div>
-    </div>
+  <AuthGate>
+    <div class="min-h-screen flex flex-col bg-slate-100">
 
     <!-- MAIN CRM APPLICATION -->
-    <template v-else>
+    <template>
       <!-- TOP NAVIGATOR BAR (Salesforce Lightning Inspired) -->
       <header class="sticky top-0 z-30 bg-[#032d60] text-white shadow-md border-b border-blue-900/80">
         <div class="max-w-[1600px] mx-auto px-3 sm:px-6 h-16 flex items-center justify-between gap-3">
@@ -1449,11 +1413,14 @@
         </div>
       </div>
     </template>
-  
-  </div>
+    </div>
+  </AuthGate>
 </template>
 
 <script>
+import AuthGate from './components/AuthGate.vue'
+import { supabase } from './lib/supabaseClient'
+
 const DEFAULT_AVATARS = [
   "https://ui-avatars.com/api/?name=Muhammad+Farid&background=0176d3&color=fff",
   "https://ui-avatars.com/api/?name=Chloe+Lim&background=032d60&color=fff",
@@ -1461,9 +1428,12 @@ const DEFAULT_AVATARS = [
 ];
 
 export default {
-      data() {
+  components: {
+    AuthGate
+  },
+
+  data() {
         return {
-          isAuthenticated: true,
           sidebarOpen: true,
           activeView: 'dashboard',
           searchQuery: '',
@@ -1489,11 +1459,6 @@ export default {
           adminNewRace: '',
           adminNewRelation: '',
           adminNewBank: '',
-
-          loginForm: {
-            username: 'admin@lajudana.com.my',
-            password: 'password123'
-          },
 
           currentAdmin: {
             name: 'Pentadbir Utama LajuDana',
@@ -1925,16 +1890,17 @@ export default {
           }, 4000);
         },
 
-        confirmLogout() {
-          this.showLogoutConfirm = false;
-          this.selectedCustomer = null;
-          this.isAuthenticated = false;
-        },
+        async confirmLogout() {
+  this.showLogoutConfirm = false;
+  this.selectedCustomer = null;
 
-        handleLogin() {
-          this.isAuthenticated = true;
-          this.showToast('Selamat kembali ke LajuDana CRM (powered by SoBot)!');
-        },
+  const { error } = await supabase.auth.signOut();
+
+  if (error) {
+    console.error('Logout error:', error.message);
+    this.showToast('Log keluar gagal. Sila cuba semula.');
+  }
+},
 
         exportDatabaseJson() {
           const payload = {
